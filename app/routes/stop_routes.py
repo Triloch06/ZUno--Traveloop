@@ -9,13 +9,23 @@ from typing import List
 from app.database.session import get_db
 from app.schemas.stop_schema import StopCreate, StopUpdate, StopResponse
 from app.models.stop import Stop
+from app.models.trip import Trip
 
 router = APIRouter()
 
 
 @router.post("/", response_model=StopResponse, status_code=status.HTTP_201_CREATED)
 def create_stop(payload: StopCreate, db: Session = Depends(get_db)):
+    trip = db.query(Trip).filter(
+    Trip.id == payload.trip_id
+).first()
 
+    if not trip:
+        raise HTTPException(
+            status_code=404,
+            detail="Trip not found"
+        )
+        
     new_stop = Stop(
         city=payload.city,
         country=payload.country,

@@ -27,6 +27,8 @@ from app.config.settings import settings
 # pyrefly: ignore [missing-import]
 from app.database.database import engine, Base
 
+# pyrefly: ignore [missing-import]
+from app.models.packing_item import PackingItem
 # Create database tables (ideal for demo/dev, usually handled by Alembic in prod)
 
 Base.metadata.create_all(bind=engine)

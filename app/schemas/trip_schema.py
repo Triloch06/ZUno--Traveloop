@@ -1,7 +1,7 @@
 """
 trip_schema.py — Pydantic schemas for Trip endpoints
 """
-
+from app.schemas.stop_schema import StopResponse
 from pydantic import BaseModel
 from datetime import date, datetime
 from typing import Optional
@@ -35,6 +35,7 @@ class TripResponse(BaseModel):
     total_budget: Optional[float] = None
     owner_id: Optional[int] = None
     created_at: Optional[datetime] = None
-
+    stops: list[StopResponse] = []
+    stops: list[StopResponse] = []
     class Config:
         from_attributes = True

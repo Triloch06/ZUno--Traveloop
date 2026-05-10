@@ -6,9 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
+# pyrefly: ignore [missing-import]
 from app.database.session import get_db
 from app.schemas.trip_schema import TripCreate, TripUpdate, TripResponse
 from app.models.trip import Trip
+from app.models.expense import Expense
+from app.models.stop import Stop
 router = APIRouter()
 
 
@@ -99,3 +102,55 @@ def delete_trip(trip_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return None
+@router.get("/{trip_id}/budget-summary")
+def get_budget_summary(
+    trip_id: int,
+    db: Session = Depends(get_db)
+):
+
+    trip = db.query(Trip).filter(
+        Trip.id == trip_id
+    ).first()
+
+    if not trip:
+        raise HTTPException(
+            status_code=404,
+            detail="Trip not found"
+        )
+
+    expenses = db.query(Expense).filter(
+        Expense.trip_id == trip_id
+    ).all()
+
+    total_spent = sum(
+        expense.amount for expense in expenses
+    )
+
+    remaining_budget = trip.total_budget - total_spent
+
+    return {
+        "trip_id": trip.id,
+        "total_budget": trip.total_budget,
+        "total_spent": total_spent,
+        "remaining_budget": remaining_budget
+    }
+@router.get(
+    "/{trip_id}/full-itinerary",
+    response_model=TripResponse
+)
+def get_full_itinerary(
+    trip_id: int,
+    db: Session = Depends(get_db)
+):
+
+    trip = db.query(Trip).filter(
+        Trip.id == trip_id
+    ).first()
+
+    if not trip:
+        raise HTTPException(
+            status_code=404,
+            detail="Trip not found"
+        )
+
+    return trip

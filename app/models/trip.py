@@ -29,3 +29,4 @@ class Trip(Base):
     
     stops = relationship("Stop", back_populates="trip", cascade="all, delete-orphan")
     expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
+   

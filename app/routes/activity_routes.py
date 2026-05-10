@@ -7,13 +7,32 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database.session import get_db
-from app.schemas.activity_schema import ActivityCreate, ActivityUpdate, ActivityResponse
+from app.schemas.activity_schema import (
+    ActivityCreate,
+    ActivityUpdate,
+    ActivityResponse
+)
 from app.models.activity import Activity
+from app.models.stop import Stop
+
 router = APIRouter()
 
 
 @router.post("/", response_model=ActivityResponse, status_code=status.HTTP_201_CREATED)
-def create_activity(payload: ActivityCreate, db: Session = Depends(get_db)):
+def create_activity(
+    payload: ActivityCreate,
+    db: Session = Depends(get_db)
+):
+
+    stop = db.query(Stop).filter(
+        Stop.id == payload.stop_id
+    ).first()
+
+    if not stop:
+        raise HTTPException(
+            status_code=404,
+            detail="Stop not found"
+        )
 
     new_activity = Activity(
         name=payload.name,
@@ -33,7 +52,10 @@ def create_activity(payload: ActivityCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/stop/{stop_id}", response_model=List[ActivityResponse])
-def list_activities(stop_id: int, db: Session = Depends(get_db)):
+def list_activities(
+    stop_id: int,
+    db: Session = Depends(get_db)
+):
 
     activities = db.query(Activity).filter(
         Activity.stop_id == stop_id
@@ -84,7 +106,10 @@ def update_activity(
 
 
 @router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_activity(activity_id: int, db: Session = Depends(get_db)):
+def delete_activity(
+    activity_id: int,
+    db: Session = Depends(get_db)
+):
 
     activity = db.query(Activity).filter(
         Activity.id == activity_id
